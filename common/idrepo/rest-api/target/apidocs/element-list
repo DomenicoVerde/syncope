@@ -1,0 +1,4 @@
+org.apache.syncope.common.rest.api
+org.apache.syncope.common.rest.api.batch
+org.apache.syncope.common.rest.api.beans
+org.apache.syncope.common.rest.api.service

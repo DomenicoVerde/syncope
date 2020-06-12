@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAAA;;;;;;;;;;;;;;;;;GAiBG;AAEH;CACE;EACA,SAAS,EAAE,IAAI;;;AAGjB;;2BAE4B;EAC1B,SAAS,EAAE,cAAc;;;AAG3B;;;;;;;;;;;;;;;;;;;;;gCAqBiC;EAC/B,SAAS,EAAE,IAAI;;;AAGjB;;;;;;;;;+BASgC;EAC9B,SAAS,EAAE,eAAe;;;AAI1B,iBAAQ;EACN,MAAM,EAAE,IAAI;;;AAKd,yBAAO;EACL,SAAS,EAAE,cAAc;;;AAI7B,YAAa;EACX,SAAS,EAAE,GAAG;;;AAId,4BAAa;EACX,SAAS,EAAE,IAAI;;;AAInB;;mCAEoC;EAClC,SAAS,EAAE,eAAe;;;AAG5B;;;;;iBAKkB;EAChB,KAAK,EAAE,IAAI;EACX,MAAM,EAAE,IAAI;;;AAGd;aACc;EACZ,KAAK,EAAE,gBAAgB",
+"sources": ["../../../../../../../src/main/resources/META-INF/resources/ui-commons/css/accessibility/accessibilityFont.scss"],
+"names": [],
+"file": "accessibilityFont.css"
+}

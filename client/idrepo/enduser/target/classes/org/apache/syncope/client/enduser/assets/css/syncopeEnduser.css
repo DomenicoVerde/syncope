@@ -1,0 +1,455 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/* Enduser color palette
+============================================================================= */
+/* https://coolors.co/718a99-6a93ba-9cc9e7-a3ccf7-b9d8f7 */
+/* SCSS Methods
+============================================================================= */
+/* Breakpoints */
+/* General
+============================================================================= */
+body, html {
+  width: 100%;
+  background-image: linear-gradient(#718a99, #6a93ba);
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+body > .wrapper {
+  height: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  align-items: center;
+}
+body > .wrapper .content-wrapper {
+  width: 100%;
+  margin: 0 2rem;
+}
+
+/* Login
+============================================================================= */
+.btn.btn-signin {
+  background-color: #6a93ba;
+  color: #ffffff;
+}
+.btn.btn-signin:hover, .btn.btn-signin:active, .btn.btn-signin:focus {
+  background-color: #9cc9e7;
+}
+.btn.btn-sso:hover, .btn.btn-sso:active, .btn.btn-sso:focus {
+  background-color: #9cc9e7;
+}
+
+.form-signin .form-control:focus {
+  border-color: #6a93ba;
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px #6a93ba;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px #6a93ba;
+  -o-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px #6a93ba;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px #6a93ba;
+}
+
+.login_link {
+  margin: 8px 0;
+}
+.login_link a {
+  text-decoration: none;
+}
+
+/* Wizard layout
+============================================================================= */
+.content-wrapper .wizard-form {
+  height: auto;
+  /*min-height: 446px;*/
+  min-height: 530px;
+}
+.content-wrapper .wizard-form form {
+  height: 530px;
+}
+.content-wrapper .wizard-form .captcha_block {
+  text-align: center;
+  padding-top: 8rem;
+}
+.content-wrapper .wizard-form .captcha_block div {
+  padding-bottom: 15px;
+}
+.content-wrapper .wizard-form .captcha_block #captcha_image {
+  font-size: 1.6rem;
+}
+.content-wrapper .wizard-form .captcha_block #captcha_message {
+  font-size: 1.45rem;
+}
+.content-wrapper .wizard-form .wizard-header {
+  padding: 10px;
+}
+.content-wrapper .wizard-form .wizard-header a {
+  text-decoration: none;
+  color: #6a93ba !important;
+}
+.content-wrapper .wizard-form .wizard-view .box-body {
+  overflow-y: auto;
+  max-height: 355px;
+  padding: 0 10px 20px 0;
+}
+
+form .wizard-buttons {
+  display: table;
+  height: 65px;
+  width: 100%;
+  padding: 6px 0px 5px 0px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  background-color: #718a99;
+}
+form .wizard-buttons > div {
+  display: table-cell;
+  vertical-align: middle;
+}
+form .wizard-buttons .pull-left {
+  padding-left: 15px;
+}
+form .wizard-buttons .pull-right {
+  padding-right: 15px;
+}
+
+.btn-primary:not(.btn-signin) {
+  color: inherit;
+  background-color: #a3ccf7;
+  border-color: #b9d8f7;
+}
+.btn-primary:not(.btn-signin):hover, .btn-primary:not(.btn-signin).focus, .btn-primary:not(.btn-signin):focus, .btn-primary:not(.btn-signin).active, .btn-primary:not(.btn-signin):active {
+  color: inherit;
+  background-color: #b9d8f7;
+  border-color: transparent;
+}
+
+.callout-warning {
+  background-color: #f7c899;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.callout-warning label {
+  margin-bottom: 0;
+}
+
+/* From AdminLTE */
+.box {
+  position: relative;
+  border-radius: 3px;
+  background: #ffffff;
+  border-top: 3px solid #d2d6de;
+  margin-bottom: 20px;
+  width: 100%;
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -o-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.box.box-primary {
+  border-top-color: #6a93ba;
+}
+
+/* Form elements
+============================================================================= */
+/* 
+* Disabled elements
+* ------------------------------ */
+.form-control[disabled],
+.form-control[readonly],
+fieldset[disabled] .form-control {
+  background-color: rgba(189, 201, 206, 0.73);
+}
+
+/* 
+* Select / Dropdown
+* ------------------------------ */
+.bootstrap-select > .dropdown-toggle {
+  background: rgba(106, 147, 186, 0.34);
+}
+.bootstrap-select > .dropdown-menu li.selected {
+  background: rgba(106, 147, 186, 0.34) !important;
+}
+
+/* 
+* Checkbox, Radio 
+* ------------------------------ */
+/* Basic styles */
+.checkbox label,
+.radio label {
+  position: initial;
+  display: inline-block;
+  padding: 0 0 0 2em;
+  height: 1.5em;
+  line-height: 1.5;
+  cursor: default;
+}
+
+.checkbox label::before,
+.checkbox label::after,
+.radio label::before,
+.radio label::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.checkbox label::before,
+.radio label::before {
+  content: " ";
+  border: 2px solid #bdc3c7;
+  border-radius: 20%;
+}
+
+.checkbox input[type=checkbox],
+.checkbox-inline input[type=checkbox],
+.radio input[type=radio],
+.radio-inline input[type=radio] {
+  margin-left: 0;
+}
+
+input {
+  /* Checkbox */
+  /* Radio */
+  /* :checked */
+}
+input[type="checkbox"], input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  z-index: 1;
+  width: 50px;
+  height: 20px;
+  cursor: pointer;
+}
+input[type="checkbox"] + label::after {
+  content: "\2713";
+  color: #ffffff;
+  line-height: 1.5;
+  text-align: center;
+}
+input[type="radio"] + label::before {
+  border-radius: 50%;
+}
+input[type=radio] + label::after {
+  content: " ";
+  top: .25em;
+  left: .25em;
+  width: 1em;
+  height: 1em;
+  background: #fff;
+  border: .2em solid #2c3e50;
+  border-radius: 50%;
+}
+input[type="checkbox"]:checked + label::before, input[type="radio"]:checked + label::before {
+  background: #6a93ba;
+  border-color: #9cc9e7;
+}
+input[type="checkbox"] + label::after, input[type=radio] + label::after {
+  -webkit-transform: scale(0);
+  -moz-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
+  transform: scale(0);
+}
+input[type="checkbox"]:checked + label::after, input[type=radio]:checked + label::after {
+  -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  transform: scale(1);
+}
+
+/* Transition */
+.checkbox label::before, .checkbox label::after {
+  -webkit-transition: 0.25s all ease;
+  -moz-transition: 0.25s all ease;
+  -ms-transition: 0.25s all ease;
+  -o-transition: 0.25s all ease;
+  transition: 0.25s all ease;
+}
+
+.radio label::before, .radio label::after {
+  -webkit-transition: 0.25s all ease;
+  -moz-transition: 0.25s all ease;
+  -ms-transition: 0.25s all ease;
+  -o-transition: 0.25s all ease;
+  transition: 0.25s all ease;
+}
+
+/* 
+* Select
+* ------------------------------ */
+option:focus, option:active, option:checked {
+  color: #9cc9e7 !important;
+  background: #9cc9e7 !important;
+}
+
+/* Navbar
+============================================================================= */
+.enduser_navbar {
+  position: absolute;
+  width: 100%;
+  z-index: 10;
+  align-self: flex-start;
+  /*max-width: 768px;*/
+  min-width: 415px;
+  /*width: auto;*/
+  /*padding-right: 20px;*/
+  background-color: #6a93ba;
+  border-color: #9cc9e7;
+}
+.enduser_navbar .dropdown-menu a {
+  height: auto;
+}
+.enduser_navbar .dropdown-menu > li > a:focus, .enduser_navbar .dropdown-menu > li > a:hover {
+  background-color: #a3ccf7;
+}
+.enduser_navbar .navbar-brand {
+  padding: 2px 26px 2px 15px;
+}
+.enduser_navbar .navbar-brand img {
+  width: 50px;
+  height: 55px;
+}
+.enduser_navbar .navbar-nav > .active > a,
+.enduser_navbar .navbar-nav > .active > a:focus,
+.enduser_navbar .navbar-nav > .active > a:hover,
+.enduser_navbar .navbar-nav > li > a:focus,
+.enduser_navbar .navbar-nav > li > a:hover,
+.enduser_navbar .navbar-toggle:focus,
+.enduser_navbar .navbar-toggle:hover {
+  background-color: #b9d8f7;
+}
+.enduser_navbar .navbar-nav > .open > a,
+.enduser_navbar .navbar-nav > .open > a:focus,
+.enduser_navbar .navbar-nav > .open > a:hover {
+  background-color: #a3ccf7;
+}
+.enduser_navbar .navbar-nav > li:not(.active):not(:hover):not(.open) > a {
+  -webkit-transition: 0.25s all ease;
+  -moz-transition: 0.25s all ease;
+  -ms-transition: 0.25s all ease;
+  -o-transition: 0.25s all ease;
+  transition: 0.25s all ease;
+}
+.enduser_navbar .navbar-nav > li:not(.active):not(:hover):not(.open) > a:not(:focus) {
+  color: #ffffff;
+}
+@media (max-width: 767px) {
+  .enduser_navbar .navbar-nav .dropdown a.dropdown-toggle:not(:focus) {
+    color: #ffffff;
+  }
+  .enduser_navbar .navbar-nav .dropdown.open .dropdown-menu > li > a {
+    color: #ffffff;
+  }
+}
+.enduser_navbar::before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  border: 28px solid black;
+  border-color: transparent #9cc9e7 transparent transparent;
+  top: 0px;
+  right: 0;
+}
+.enduser_navbar::after {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  border: 28px solid white;
+  border-color: transparent #718a99 transparent transparent;
+  /* use the background color here */
+  top: 0px;
+  right: -1px;
+  /* 1px less than the other "before" element */
+}
+@media (max-width: 767px) {
+  .enduser_navbar {
+    min-width: 290px;
+  }
+  .enduser_navbar a {
+    height: 45px;
+  }
+  .enduser_navbar .navbar-toggle {
+    margin-right: 6rem;
+  }
+  .enduser_navbar .navbar-toggle:not(:focus) .icon-bar {
+    background-color: #ffffff;
+  }
+  .enduser_navbar .navbar-brand img {
+    height: 50px;
+  }
+}
+.enduser_navbar .subnav a {
+  padding-left: 30px;
+}
+.enduser_navbar .navbar-right {
+  padding-right: 4rem;
+}
+.enduser_navbar .navbar-right .btn-navbar-right i {
+  font-size: 26px;
+}
+.enduser_navbar .navbar-right .btn-navbar-right:hover {
+  cursor: pointer;
+}
+
+/* Accessibility
+============================================================================= */
+/* Password Reset / Confirm Password Reset / Must Change Password
+============================================================================= */
+@media (min-width: 1024px) {
+  .password_reset_wrapper {
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+}
+.password_reset_wrapper .page-header {
+  text-align: center;
+}
+.password_reset_wrapper form {
+  text-align: center;
+}
+.password_reset_wrapper form .password_reset_buttons {
+  padding-top: 30px;
+}
+
+.enduser_fieldset {
+  padding: 0 10px;
+}
+
+#mcp_logo {
+  padding-top: 20px;
+  padding-bottom: 15px;
+}
+
+/*# sourceMappingURL=syncopeEnduser.css.map */

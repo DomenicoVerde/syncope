@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAAA;;;;;;;;;;;;;;;;;GAiBG;AACH,MAAO;EACL,OAAO,EAAE,YAAY;;;AAEvB,UAAW;EACT,OAAO,EAAE,UAAU;EACnB,cAAc,EAAE,MAAM;EACtB,UAAU,EAAE,MAAM;EAClB,KAAK,EAAE,IAAI;EACX,YAAY,EAAE,GAAG;;;AAGnB,eAAgB;EACd,OAAO,EAAE,YAAY;EACrB,KAAK,EAAE,IAAI;;;AAIX,yBAAM;EACJ,eAAe,EAAE,QAAQ;;AACzB,0DAAO;EACL,MAAM,EAAE,cAAc;EACtB,OAAO,EAAE,SAAS;;AAGtB,qCAAkB;EAChB,OAAO,EAAE,GAAG;EACZ,MAAM,EAAE,gBAAgB;;;AAI5B,WAAY;EACV,UAAU,EAAE,gBAAgB",
+"sources": ["../../../../../../src/main/resources/META-INF/resources/ui-commons/css/batch.scss"],
+"names": [],
+"file": "batch.css"
+}

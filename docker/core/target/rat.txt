@@ -1,0 +1,60 @@
+
+*****************************************************
+Summary
+-------
+Generated at: 2020-05-29T18:21:56+02:00
+
+Notes: 2
+Binaries: 0
+Archives: 0
+Standards: 32
+
+Apache Licensed: 32
+Generated Documents: 0
+
+JavaDocs are generated, thus a license header is optional.
+Generated files do not require license headers.
+
+0 Unknown Licenses
+
+*****************************************************
+  Files with Apache License headers will be marked AL
+  Binary files (which do not require any license headers) will be marked B
+  Compressed archives will be marked A
+  Notices, licenses etc. will be marked N
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/pom.xml
+  N     /home/domenicoverde/Scrivania/syncope-master/docker/core/NOTICE
+  N     /home/domenicoverde/Scrivania/syncope-master/docker/core/LICENSE
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/application.properties
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/provisioning.properties.mariadb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/provisioning.properties.mysql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/index.xml.myjson
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/startup.sh
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/views.xml.mysql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/provisioning.properties.postgresql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/views.xml.pgjsonb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/views.xml.postgresql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/Dockerfile
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/keymaster.properties
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/views.xml.myjson
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/views.xml.mariadb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/log4j2.xml
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/persistence.properties.pgjsonb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/persistence.properties.all
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/persistence.properties.myjson
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/indexes.xml.pgjsonb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/MasterContent.xml.pgjsonb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/Master.properties.pgjsonb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/Master.properties.mariadb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/Master.properties.postgresql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/MasterContent.xml.all
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/MasterContent.xml.myjson
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/Master.properties.mysql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/Master.properties.myjson
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/domains/Master.properties.mssql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/provisioning.properties.mssql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/provisioning.properties.pgjsonb
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/views.xml.mssql
+  AL    /home/domenicoverde/Scrivania/syncope-master/docker/core/src/main/resources/provisioning.properties.myjson
+ 
+*****************************************************
