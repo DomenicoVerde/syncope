@@ -38,7 +38,7 @@ under the License.
     <rootpom.basedir>${basedir}/..</rootpom.basedir>
   </properties>
 
-  <profiles>
+<!--  <profiles>
     <profile>
       <id>site</id>
 
@@ -75,7 +75,7 @@ under the License.
         </plugins>
       </build>
     </profile>
-  </profiles>
+  </profiles> -->
 
   <repositories>
     <repository>

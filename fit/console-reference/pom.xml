@@ -254,28 +254,6 @@ under the License.
 
         <plugins>         
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <inherited>true</inherited>
-            <executions>
-              <execution>
-                <id>enableHotSwapForCore</id>
-                <phase>package</phase>
-                <configuration>
-                  <target>                                               
-                    <copy file="${basedir}/../core-reference/target/test-classes/hotswap-agent.properties"
-                          tofile="${basedir}/../core-reference/target/syncope-fit-core-reference-${project.version}/WEB-INF/classes/hotswap-agent.properties"
-                          overwrite="true"/>
-                  </target>
-                </configuration>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
             <groupId>org.codehaus.cargo</groupId>
             <artifactId>cargo-maven2-plugin</artifactId>
             <inherited>true</inherited>

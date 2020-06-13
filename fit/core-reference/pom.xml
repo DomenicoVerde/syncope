@@ -245,27 +245,7 @@ under the License.
           </execution>
         </executions>
       </plugin>
-      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <inherited>true</inherited>
-        <executions>
-          <execution>
-            <id>setupCSV</id>
-            <phase>pre-integration-test</phase>
-            <configuration>
-              <target>
-                <copy file="${project.build.directory}/test-classes/test.csv" todir="${test.csvdir.path}" overwrite="true" />
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
+     
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
@@ -282,88 +262,6 @@ under the License.
             <goals>
               <goal>verify</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
-        <inherited>true</inherited>
-        <configuration>
-          <container>
-            <containerId>tomcat9x</containerId>
-            <zipUrlInstaller>
-              <url>https://repo1.maven.org/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip</url>
-              <downloadDir>${settings.localRepository}/org/codehaus/cargo/cargo-container-archives</downloadDir>
-              <extractDir>${project.build.directory}/cargo/extract</extractDir>
-            </zipUrlInstaller>
-            <timeout>300000</timeout>
-            <log>${cargo.log}</log>
-            <output>${cargo.output}</output>
-            <systemProperties>
-              <java.security.egd>file:/dev/./urandom</java.security.egd>
-              <java.util.secureRandomSeed>true</java.util.secureRandomSeed>
-              
-              <obscureSecretKey>${obscureSecretKey}</obscureSecretKey>
-            </systemProperties>
-            <dependencies>
-              <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-              </dependency>
-              <dependency>
-                <groupId>${jdbcdriver.groupId}</groupId>
-                <artifactId>${jdbcdriver.artifactId}</artifactId>
-              </dependency>
-            </dependencies>
-          </container>
-          <configuration>
-            <properties>
-              <cargo.jvmargs>
-                -Dspring.profiles.active=embedded
-                -XX:+CMSClassUnloadingEnabled -XX:+UseG1GC -Xmx1024m -Xms512m</cargo.jvmargs>
-            </properties>
-          </configuration>
-          <deployables>
-            <deployable>
-              <groupId>org.apache.syncope.fit</groupId>
-              <artifactId>syncope-fit-build-tools</artifactId>
-              <type>war</type>
-              <properties>
-                <context>syncope-fit-build-tools</context>
-              </properties>
-            </deployable>
-            <deployable>
-              <location>${project.build.directory}/${project.build.finalName}</location>
-              <pingURL>http://localhost:${cargo.servlet.port}/syncope/index.html</pingURL>
-              <pingTimeout>${cargo.deployable.ping.timeout}</pingTimeout>
-              <properties>
-                <context>syncope</context>
-              </properties>
-            </deployable>
-          </deployables>
-        </configuration>
-        <executions>
-          <execution>
-            <id>start-container</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>start</goal>
-            </goals>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
-          </execution>
-          <execution>
-            <id>stop-container</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>stop</goal>
-            </goals>
-            <configuration>
-              <skip>${skipTests}</skip>
-            </configuration>
           </execution>
         </executions>
       </plugin>

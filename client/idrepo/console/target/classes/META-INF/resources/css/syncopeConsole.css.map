@@ -1,7 +1,0 @@
-{
-"version": 3,
-"mappings": "AAAA;;;;;;;;;;;;;;;;;GAiBG;AAQH;gFACgF;AAYhF;gFACgF;AASxE,+CAAyB;EACvB,cAAc,EAAE,MAAM;;;AAQhC;gFACgF;AAG9E,gCAAoB;EAClB,YAAY,EA3CY,OAAkB;EAU5C,eAAe,EAAE,qDAAK;EACtB,kBAAkB,EAAE,qDAAK;EACzB,aAAa,EAAE,qDAAK;EACpB,UAAU,EAAE,qDAAK;;;AAoCjB,eAAa;EACX,gBAAgB,EAlDQ,OAAkB;;AAoD1C,oEAA2B;EACzB,gBAAgB,EApDI,OAAO;;AAwD7B,2DAA2B;EACzB,gBAAgB,EAzDI,OAAO;;;AAgEjC;gFACgF;AAEhF,YAAa;EACX,MAAM,EAAE,IAAI;;AAEZ,sBAAU;EACR,UAAU,EAtEa,IAAI;;AAyE7B,kBAAM;EACJ,MAAM,EAAE,IAAI;;AAGd,oCAAwB;EACtB,OAAO,EAAE,UAAU",
-"sources": ["../../../../../src/main/resources/META-INF/resources/css/syncopeConsole.scss"],
-"names": [],
-"file": "syncopeConsole.css"
-}

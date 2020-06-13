@@ -1,7 +1,0 @@
-{
-"version": 3,
-"mappings": "AAAA;;;;;;;;;;;;;;;;;GAiBG;ACjBH;;;;;;;;;;;;;;;;;GAiBG;AAGH;gFACgF;AAuGhF;gFACgF;ADtGhF,kBAAmB;EACjB,QAAQ,EAAE,QAAQ;EAClB,KAAK,EAAE,CAAC;EACR,SAAS,EAAE,IAAI;EACf,OAAO,EAAE,aAAa;;AACtB,oBAAE;EACA,SAAS,EAAE,IAAI;;AAEjB,wBAAQ;EACN,MAAM,EAAE,OAAO;;;AAInB,6BAA8B;EAC5B,OAAO,EAAE,iBAA6B;;;AAGxC,gBAAiB;EACf,GAAG,EAAE,CAAC;;;AAGR,gBAAiB;EACf,GAAG,EAAE,IAAI;;;ACsFT,yBAA2C;EDlF3C,gBAAiB;IACf,MAAM,EAAE,IAAI;IACZ,GAAG,EAAE,IAAI;;;EAGX,gBAAiB;IACf,MAAM,EAAE,IAAI;IACZ,GAAG,EAAE,IAAI",
-"sources": ["../../../../../../src/main/resources/META-INF/resources/ui-commons/css/accessibility.scss","../../../../../../src/main/resources/META-INF/resources/ui-commons/css/utils.scss"],
-"names": [],
-"file": "accessibility.css"
-}
