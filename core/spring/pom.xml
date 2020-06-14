@@ -112,7 +112,12 @@ under the License.
       <artifactId>syncope-common-keymaster-client-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+    <dependency>
+      <groupId>org.pitest</groupId>
+      <artifactId>pitest-maven</artifactId>
+      <version>1.5.1</version>
+      <type>maven-plugin</type>
+    </dependency> 
     <!-- TEST -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -141,6 +146,22 @@ under the License.
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>1.5.1</version>
+        <configuration>
+            <targetClasses>
+                <param>org.apache.syncope.core.spring.policy.DefaultAccountRule</param>
+                <param>org.apache.syncope.core.spring.policy.DefaultPasswordRule</param>
+            </targetClasses>
+            <targetTests>
+                <param>org.apache.core.spring.DefaultAccountRuleTest</param>
+                <param>org.apache.core.spring.DefaultPasswordRuleTest</param>
+            </targetTests>
+            <threads>4</threads>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
