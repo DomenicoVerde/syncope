@@ -1,12 +1,10 @@
 package org.apache.core.spring;
 
 import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -151,7 +149,7 @@ public class DefaultPasswordRuleTest extends DefaultPasswordRule {
 	//Other tests to reach adequacy criteria
 	@Test
 	public void passwordLengthTest() {
-		// Covering condition: No limits set for password
+		// No limits set for password
 		when(conf.getMinLength()).thenReturn(0);
 		when(conf.getMaxLength()).thenReturn(0);
 		try {
@@ -166,13 +164,13 @@ public class DefaultPasswordRuleTest extends DefaultPasswordRule {
 		// Let the password be equal to the username
 		when(conf.isUsernameAllowed()).thenReturn(true);
 		
-		//Covering condition username = password
 		try {
 			super.enforce("domenico", "domenico", new HashSet<String>());
 		} catch (Exception e) {
 			Assert.fail();
 		}
 		
+		// Now the password must be different
 		when(conf.isUsernameAllowed()).thenReturn(false);
 		boolean passed = false;
 		try {
@@ -181,7 +179,7 @@ public class DefaultPasswordRuleTest extends DefaultPasswordRule {
 			passed = true;
 		}
 		
-		//Covering condition username = null
+		// tests the case username = null
 		try {
 			super.enforce("password", null, new HashSet<String>());
 		} catch (Exception e) {
@@ -263,6 +261,12 @@ public class DefaultPasswordRuleTest extends DefaultPasswordRule {
 		}
 		
 		Assert.assertTrue(passed);
+		
+		try {
+			super.enforce("0password", "domenico", new HashSet<String>());
+		} catch (PasswordPolicyException e) {
+			Assert.fail();
+		}
 	}
 	
 	@Test
@@ -280,6 +284,12 @@ public class DefaultPasswordRuleTest extends DefaultPasswordRule {
 		}
 		
 		Assert.assertTrue(passed);
+		
+		try {
+			super.enforce("password0", "domenico", new HashSet<String>());
+		} catch (PasswordPolicyException e) {
+			Assert.fail();
+		}
 	}
 	
 	@Test
@@ -546,5 +556,29 @@ public class DefaultPasswordRuleTest extends DefaultPasswordRule {
 		}
 		
 		Assert.assertTrue(passed2);
+	}
+	
+	@Test
+	public void wordsNotPermittedTest() {
+		// Using default policy, testing not permitted words
+		Set<String> wordsNotPermitted = new HashSet<String>();
+		wordsNotPermitted.add("word");
+		String valid = "validpass";
+		String invalid = "password";
+		String username = "username";
+		boolean passed = false;
+		try {
+			super.enforce(invalid, username, wordsNotPermitted);
+		} catch (PasswordPolicyException e) {
+				passed = true;
+		}
+		
+		Assert.assertTrue(passed);
+		
+		try {
+			super.enforce(valid, username, wordsNotPermitted);
+		} catch (PasswordPolicyException e) {
+			Assert.fail();
+		}
 	}
 }

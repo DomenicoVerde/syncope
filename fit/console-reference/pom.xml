@@ -87,31 +87,11 @@ under the License.
       <version>${project.version}</version>
     </dependency>
     
-    <!-- TEST -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.syncope.fit</groupId>
-      <artifactId>syncope-fit-build-tools</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.syncope.fit</groupId>
-      <artifactId>syncope-fit-core-reference</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <plugin>
+<!--      <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven2-plugin</artifactId>
         <inherited>true</inherited>
@@ -165,7 +145,7 @@ under the License.
             </deployable>
           </deployables>
         </configuration>
-      </plugin>
+      </plugin> -->
       
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -191,122 +171,5 @@ under the License.
   </build>
   
   <profiles>
-    <profile>
-      <id>skipTests</id>
-    </profile>
-
-    <profile>
-      <id>debug</id>
-
-      <properties>
-        <skipTests>true</skipTests>
-      </properties>
-
-      <build>
-        <defaultGoal>clean verify cargo:run</defaultGoal>
-        
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.cargo</groupId>
-            <artifactId>cargo-maven2-plugin</artifactId>
-            <inherited>true</inherited>
-            <configuration>
-              <configuration>
-                <properties>
-                  <cargo.jvmargs>
-                    -Dspring.profiles.active=embedded
-                    -Dwicket.core.settings.general.configuration-type=development
-                    -Xdebug -Djaxb.debug=true -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n
-                    -XX:+CMSClassUnloadingEnabled -XX:+UseG1GC -Xmx1024m -Xms512m</cargo.jvmargs>
-                </properties>
-              </configuration>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    
-    <!-- requires JAVA_HOME set to the latest JDK from https://github.com/TravaOpenJDK/trava-jdk-11-dcevm -->
-    <profile>
-      <id>hotswap</id>
-      
-      <dependencies>
-        <!-- wicket-ioc depends on cglib, need to exclude it for hotswap to work -->
-        <dependency>
-          <groupId>org.apache.syncope.client.idm</groupId>
-          <artifactId>syncope-client-idm-console</artifactId>
-          <version>${project.version}</version>
-          <exclusions>
-            <exclusion>
-              <groupId>cglib</groupId>
-              <artifactId>cglib</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>cglib</groupId>
-          <artifactId>cglib-nodep</artifactId>
-        </dependency>
-      </dependencies>
-
-      <build>
-        <defaultGoal>clean verify cargo:run</defaultGoal>
-
-        <plugins>         
-          <plugin>
-            <groupId>org.codehaus.cargo</groupId>
-            <artifactId>cargo-maven2-plugin</artifactId>
-            <inherited>true</inherited>
-            <configuration>
-              <configuration>
-                <properties>
-                  <cargo.jvmargs>
-                    -Dspring.profiles.active=embedded
-                    -Dwicket.core.settings.general.configuration-type=development
-                    -javaagent:${java.home}/lib/hotswap/hotswap-agent.jar=autoHotswap=true,disablePlugin=Spring,disablePlugin=Hibernate,disablePlugin=CxfJAXRS
-                    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
-                    -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -Xmx1024m -Xms512m</cargo.jvmargs>
-                </properties>
-              </configuration>
-            </configuration>
-          </plugin>
-        </plugins>
-        
-        <resources>
-          <resource>
-            <directory>src/test/resources</directory>
-            <filtering>true</filtering>
-            <includes>
-              <include>hotswap-agent.properties</include>
-            </includes>
-          </resource>
-        </resources>
-      </build>
-    </profile>
-    
-    <profile>
-      <id>apache-release</id>
-
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-deploy-plugin</artifactId>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <inherited>false</inherited>
-            <configuration>
-              <skipSource>true</skipSource>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
   </profiles>
 </project>

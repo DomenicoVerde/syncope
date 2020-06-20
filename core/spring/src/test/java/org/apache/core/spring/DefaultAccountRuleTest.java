@@ -1,12 +1,10 @@
 package org.apache.core.spring;
 
 import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.syncope.common.lib.policy.DefaultAccountRuleConf;
 import org.apache.syncope.core.spring.policy.AccountPolicyException;
 import org.apache.syncope.core.spring.policy.DefaultAccountRule;
@@ -109,15 +107,23 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 	//Other tests to reach adequacy criteria
 	@Test
 	public void usernameLengthTest() {
+		//no limits set in max lenght, so let's try a generic username	
+		Set<String> wordsNotPermitted = new HashSet<String>();
+		/*try {
+			super.enforce("domenico", wordsNotPermitted);
+		} catch (Exception e) {
+			Assert.fail();
+		}*/
+		
 		// Let allow only usernames between 4 and 6 chars and test its control
 		when(conf.getMinLength()).thenReturn(4);
 		when(conf.getMaxLength()).thenReturn(6);
-		Set<String> wordsNotPermitted = new HashSet<String>();
 		boolean tooShort = false;
 		boolean tooLong = false;
-		String shortUsername = "do";
-		String longUsername = "domenico";
-		String rightUsername = "domen";
+		String shortUsername = "dom";
+		String longUsername = "domenic";
+		String rightUsername1 = "dome";
+		String rightUsername2 = "domeni";
 		
 		try {
 			super.enforce(shortUsername, wordsNotPermitted);
@@ -136,7 +142,8 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 		}
 		
 		try {
-			super.enforce(rightUsername, wordsNotPermitted);
+			super.enforce(rightUsername1, wordsNotPermitted);
+			super.enforce(rightUsername2, wordsNotPermitted);
 		} catch (AccountPolicyException e) {
 			Assert.fail();
 		}
@@ -210,6 +217,14 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 		}
 		
 		Assert.assertTrue(passed);
+		
+		// valid username 
+		username ="nico";
+		try {
+			super.enforce(username, wordsNotPermitted);
+		} catch (Exception e) {
+			Assert.fail();
+		}
 	}
 	
 	@Test
@@ -229,6 +244,14 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 		}
 		
 		Assert.assertTrue(passed);
+		
+		// valid username 
+		username ="dome";
+		try {
+			super.enforce(username, wordsNotPermitted);
+		} catch (Exception e) {
+			Assert.fail();
+		}
 	}
 	
 	@Test
