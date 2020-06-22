@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SyncopeGrantedAuthority.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">Apache Syncope Tests</a> &gt; <a href="../index.html" class="el_bundle">syncope-core-spring</a> &gt; <a href="index.source.html" class="el_package">org.apache.syncope.core.spring.security</a> &gt; <span class="el_source">SyncopeGrantedAuthority.java</span></div><h1>SyncopeGrantedAuthority.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.syncope.core.spring.security;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.syncope.core.provisioning.api.utils.RealmUtils;
+import org.springframework.security.core.GrantedAuthority;
+
+public class SyncopeGrantedAuthority implements GrantedAuthority {
+
+    private static final long serialVersionUID = -5647624636011919735L;
+
+    @JsonProperty
+    private final String entitlement;
+
+<span class="nc" id="L41">    private final Set&lt;String&gt; realms = new TreeSet&lt;&gt;();</span>
+
+    @JsonCreator
+<span class="nc" id="L44">    public SyncopeGrantedAuthority(@JsonProperty(&quot;entitlement&quot;) final String entitlement) {</span>
+<span class="nc" id="L45">        this.entitlement = entitlement;</span>
+<span class="nc" id="L46">    }</span>
+
+<span class="nc" id="L48">    public SyncopeGrantedAuthority(final String entitlement, final String realm) {</span>
+<span class="nc" id="L49">        this.entitlement = entitlement;</span>
+<span class="nc" id="L50">        this.realms.add(realm);</span>
+<span class="nc" id="L51">    }</span>
+
+    public boolean addRealm(final String newRealm) {
+<span class="nc" id="L54">        return RealmUtils.normalizingAddTo(realms, newRealm);</span>
+    }
+
+    public void addRealms(final Collection&lt;String&gt; newRealms) {
+<span class="nc" id="L58">        newRealms.forEach(this::addRealm);</span>
+<span class="nc" id="L59">    }</span>
+
+    public Set&lt;String&gt; getRealms() {
+<span class="nc" id="L62">        return Collections.unmodifiableSet(realms);</span>
+    }
+
+    @JsonIgnore
+    @Override
+    public String getAuthority() {
+<span class="nc" id="L68">        return entitlement;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L73">        return new HashCodeBuilder().</span>
+<span class="nc" id="L74">                append(entitlement).</span>
+<span class="nc" id="L75">                append(realms).</span>
+<span class="nc" id="L76">                build();</span>
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L82">            return true;</span>
+        }
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (obj == null) {</span>
+<span class="nc" id="L85">            return false;</span>
+        }
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (getClass() != obj.getClass()) {</span>
+<span class="nc" id="L88">            return false;</span>
+        }
+<span class="nc" id="L90">        final SyncopeGrantedAuthority other = (SyncopeGrantedAuthority) obj;</span>
+<span class="nc" id="L91">        return new EqualsBuilder().</span>
+<span class="nc" id="L92">                append(entitlement, other.entitlement).</span>
+<span class="nc" id="L93">                append(realms, other.realms).</span>
+<span class="nc" id="L94">                build();</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L99">        return new ToStringBuilder(this).</span>
+<span class="nc" id="L100">                append(entitlement).</span>
+<span class="nc" id="L101">                append(realms).</span>
+<span class="nc" id="L102">                build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

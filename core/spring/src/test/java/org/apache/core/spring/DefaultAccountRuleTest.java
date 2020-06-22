@@ -27,6 +27,7 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 	public void init() {
 		// Mocking a conf class to implement the following policy:
 		// username can have only lowercase characters
+		// This will be the default conf for other tests
 		conf = mock(DefaultAccountRuleConf.class, new Answer<Object>() {
 			@Override public Object answer(InvocationOnMock invocation) {
 				if (invocation.getMethod().getName().equals("Length")) {
@@ -107,17 +108,11 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 	//Other tests to reach adequacy criteria
 	@Test
 	public void usernameLengthTest() {
-		//no limits set in max lenght, so let's try a generic username	
-		Set<String> wordsNotPermitted = new HashSet<String>();
-		/*try {
-			super.enforce("domenico", wordsNotPermitted);
-		} catch (Exception e) {
-			Assert.fail();
-		}*/
-		
-		// Let allow only usernames between 4 and 6 chars and test its control
+		// Let allow only usernames between 4 and 6 chars
 		when(conf.getMinLength()).thenReturn(4);
 		when(conf.getMaxLength()).thenReturn(6);
+		
+		Set<String> wordsNotPermitted = new HashSet<String>();
 		boolean tooShort = false;
 		boolean tooLong = false;
 		String shortUsername = "dom";
@@ -203,6 +198,7 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 	@Test
 	public void prefixTest() {
 		// Tests the control about prefixes not permitted
+		// invalid username:
 		List<String> prefixes = new ArrayList<String>();
 		prefixes.add("dome");
 		Set<String> wordsNotPermitted = new HashSet<String>();
@@ -230,6 +226,7 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 	@Test
 	public void suffixTest() {
 		// Tests the control about suffixes not permitted
+		// invalid username
 		List<String> suffixes = new ArrayList<String>();
 		suffixes.add("nico");
 		Set<String> wordsNotPermitted = new HashSet<String>();
@@ -256,7 +253,7 @@ public class DefaultAccountRuleTest extends DefaultAccountRule {
 	
 	@Test
 	public void patternTest() {
-		// Tests the control about pattern not permitted
+		// Tests the control about patterns not permitted
 		Set<String> wordsNotPermitted = new HashSet<String>();
 		String username = "domenico";
 		boolean passed = false;

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AccessTokenJwsSignatureProvider.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">Apache Syncope Tests</a> &gt; <a href="../index.html" class="el_bundle">syncope-core-spring</a> &gt; <a href="index.source.html" class="el_package">org.apache.syncope.core.spring.security.jws</a> &gt; <span class="el_source">AccessTokenJwsSignatureProvider.java</span></div><h1>AccessTokenJwsSignatureProvider.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.syncope.core.spring.security.jws;
+
+import java.security.KeyFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.rs.security.jose.jwa.SignatureAlgorithm;
+import org.apache.cxf.rs.security.jose.jws.HmacJwsSignatureProvider;
+import org.apache.cxf.rs.security.jose.jws.JwsHeaders;
+import org.apache.cxf.rs.security.jose.jws.JwsSignature;
+import org.apache.cxf.rs.security.jose.jws.JwsSignatureProvider;
+import org.apache.cxf.rs.security.jose.jws.PrivateKeyJwsSignatureProvider;
+import org.springframework.beans.factory.InitializingBean;
+
+<span class="nc" id="L33">public class AccessTokenJwsSignatureProvider implements JwsSignatureProvider, InitializingBean {</span>
+
+    private SignatureAlgorithm jwsAlgorithm;
+
+    private String jwsKey;
+
+    private JwsSignatureProvider delegate;
+
+    public void setJwsAlgorithm(final SignatureAlgorithm jwsAlgorithm) {
+<span class="nc" id="L42">        this.jwsAlgorithm = jwsAlgorithm;</span>
+<span class="nc" id="L43">    }</span>
+
+    public void setJwsKey(final String jwsKey) {
+<span class="nc" id="L46">        this.jwsKey = jwsKey;</span>
+<span class="nc" id="L47">    }</span>
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (jwsAlgorithm == null) {</span>
+<span class="nc" id="L52">            throw new IllegalArgumentException(&quot;An instance of &quot; + SignatureAlgorithm.class + &quot; is required&quot;);</span>
+        }
+
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (SignatureAlgorithm.isPublicKeyAlgorithm(jwsAlgorithm)) {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (!jwsAlgorithm.getJwaName().startsWith(&quot;RS&quot;)) {</span>
+<span class="nc" id="L57">                throw new IllegalArgumentException(jwsAlgorithm.getJavaName() + &quot; not supported.&quot;);</span>
+            }
+
+<span class="nc bnc" id="L60" title="All 4 branches missed.">            if (jwsKey == null || jwsKey.indexOf(':') == -1) {</span>
+<span class="nc" id="L61">                throw new IllegalArgumentException(&quot;A key pair is required, in the 'private:public' format&quot;);</span>
+            }
+
+<span class="nc" id="L64">            KeyFactory kf = KeyFactory.getInstance(&quot;RSA&quot;);</span>
+<span class="nc" id="L65">            PKCS8EncodedKeySpec keySpecPKCS8 = new PKCS8EncodedKeySpec(</span>
+<span class="nc" id="L66">                    Base64.getDecoder().decode(StringUtils.substringBefore(jwsKey, &quot;:&quot;).getBytes()));</span>
+<span class="nc" id="L67">            delegate = new PrivateKeyJwsSignatureProvider(kf.generatePrivate(keySpecPKCS8), jwsAlgorithm);</span>
+<span class="nc" id="L68">        } else {</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            if (jwsKey == null) {</span>
+<span class="nc" id="L70">                throw new IllegalArgumentException(&quot;A shared key is required&quot;);</span>
+            }
+
+<span class="nc" id="L73">            delegate = new HmacJwsSignatureProvider(jwsKey.getBytes(), jwsAlgorithm);</span>
+        }
+<span class="nc" id="L75">    }</span>
+
+    @Override
+    public SignatureAlgorithm getAlgorithm() {
+<span class="nc" id="L79">        return delegate.getAlgorithm();</span>
+    }
+
+    @Override
+    public byte[] sign(final JwsHeaders headers, final byte[] content) {
+<span class="nc" id="L84">        return delegate.sign(headers, content);</span>
+    }
+
+    @Override
+    public JwsSignature createJwsSignature(final JwsHeaders headers) {
+<span class="nc" id="L89">        return delegate.createJwsSignature(headers);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

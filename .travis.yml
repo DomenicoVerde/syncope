@@ -1,0 +1,15 @@
+language: java
+
+jdk:
+- openjdk11
+
+addons:
+ sonarcloud:
+  organization: domenicoverde
+  token:
+    secure: "Gn3QugM+QR0JhtpF4r9rphLumsYOqv483QMzXhEzeWllENPXa+I+SL37LIv30pja5BHiOvF1IVvcOdmX0aFE/KTP5zmFXMXDO2nETD6hnDmg68mmPKoiaD1x6xqYpcnStHB6IcJJ6ISokRJo+FOxsa7lbmwIpp0/oeutu7WE9glHKUF9SojE9skE7QohWkCeXRGlNF4HNAgufU+aFkSgnKvkTo1Mw5siylCTzgaxHvhrVZk3JnM+56aHJ7dJJQ2UncNZf4m+aLtUDktmAe/+qKFo9BHaIj+IwmtTYGkcuEkbn+2wYSd579oAdx7rXcF/MhrQI8eUKTsHm50MWtAUrooI2YLf2Hl/SCuY5BX/vFepDF9HZsAhwHMRgBtifv1W1Vnzh1crkZKMwbz7CdYG5gU4Q+xMp5f32hlLa3JYdHYb7HRXyXAjnFbii/k1oq8jTBesuoddDgsZmFtSDJBsFnEDgkvH3NuHS8ajHIcLCVhAzO3Lg2g4j7hv2t8AKBq0S9ZroS9M/dn/ZOEs+bvPqxpvSVi0WXiY+7ac1l9BCPyaYuphQgJHnVsOqaV2rd3N6K6OjbQ+TZOcD5dqQdYAHUjFafDPfypjBxXptQwtdJj7Zf+/xvLldNweMeIeVQOJYQ02xvWIAWU611xt7IwaOi9hMGam/mGiMHPPa60oB6M="
+
+install: skip
+
+script: 
+- mvn sonar:sonar -Dsonar.projectKey=DomenicoVerde_Syncope -pl .,core

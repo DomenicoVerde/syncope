@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AuthDataAccessor.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">Apache Syncope Tests</a> &gt; <a href="../index.html" class="el_bundle">syncope-core-spring</a> &gt; <a href="index.source.html" class="el_package">org.apache.syncope.core.spring.security</a> &gt; <span class="el_source">AuthDataAccessor.java</span></div><h1>AuthDataAccessor.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.syncope.core.spring.security;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import org.apache.commons.lang3.ArrayUtils;
+import javax.security.auth.login.AccountNotFoundException;
+
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.syncope.common.keymaster.client.api.ConfParamOps;
+import org.apache.syncope.common.lib.SyncopeConstants;
+import org.apache.syncope.common.lib.types.AnyTypeKind;
+import org.apache.syncope.common.lib.types.AuditElements;
+import org.apache.syncope.common.lib.types.EntitlementsHolder;
+import org.apache.syncope.common.lib.types.IdRepoEntitlement;
+import org.apache.syncope.core.persistence.api.ImplementationLookup;
+import org.apache.syncope.core.persistence.api.dao.AccessTokenDAO;
+import org.apache.syncope.core.persistence.api.dao.AnySearchDAO;
+import org.apache.syncope.core.persistence.api.entity.AnyType;
+import org.apache.syncope.core.persistence.api.entity.resource.Provision;
+import org.apache.syncope.core.persistence.api.dao.AnyTypeDAO;
+import org.apache.syncope.core.persistence.api.dao.GroupDAO;
+import org.apache.syncope.core.persistence.api.dao.RealmDAO;
+import org.apache.syncope.core.persistence.api.dao.UserDAO;
+import org.apache.syncope.core.persistence.api.dao.search.AttrCond;
+import org.apache.syncope.core.persistence.api.dao.search.SearchCond;
+import org.apache.syncope.core.persistence.api.entity.AccessToken;
+import org.apache.syncope.core.persistence.api.entity.Entity;
+import org.apache.syncope.core.persistence.api.entity.Realm;
+import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
+import org.apache.syncope.core.persistence.api.entity.user.User;
+import org.apache.syncope.core.provisioning.api.AuditManager;
+import org.apache.syncope.core.provisioning.api.ConnectorFactory;
+import org.apache.syncope.core.provisioning.api.MappingManager;
+import org.apache.syncope.core.provisioning.api.utils.RealmUtils;
+import org.apache.syncope.core.spring.ApplicationContextProvider;
+import org.identityconnectors.framework.common.objects.Uid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Domain-sensible (via {@code @Transactional}) access to authentication / authorization data.
+ *
+ * @see JWTAuthenticationProvider
+ * @see UsernamePasswordAuthenticationProvider
+ * @see SyncopeAuthenticationDetails
+ */
+<span class="nc" id="L80">public class AuthDataAccessor {</span>
+
+<span class="nc" id="L82">    protected static final Logger LOG = LoggerFactory.getLogger(AuthDataAccessor.class);</span>
+
+<span class="nc" id="L84">    protected static final Encryptor ENCRYPTOR = Encryptor.getInstance();</span>
+
+<span class="nc" id="L86">    protected static final Set&lt;SyncopeGrantedAuthority&gt; ANONYMOUS_AUTHORITIES =</span>
+<span class="nc" id="L87">            Set.of(new SyncopeGrantedAuthority(IdRepoEntitlement.ANONYMOUS));</span>
+
+<span class="nc" id="L89">    protected static final String[] GROUP_OWNER_ENTITLEMENTS = new String[] {</span>
+        IdRepoEntitlement.GROUP_READ, IdRepoEntitlement.GROUP_UPDATE, IdRepoEntitlement.GROUP_DELETE
+    };
+
+    @Resource(name = &quot;adminUser&quot;)
+    protected String adminUser;
+
+    @Resource(name = &quot;anonymousUser&quot;)
+    protected String anonymousUser;
+
+    @Autowired
+    protected RealmDAO realmDAO;
+
+    @Autowired
+    protected UserDAO userDAO;
+
+    @Autowired
+    protected GroupDAO groupDAO;
+
+    @Autowired
+    protected AnyTypeDAO anyTypeDAO;
+
+    @Autowired
+    protected AnySearchDAO searchDAO;
+
+    @Autowired
+    protected AccessTokenDAO accessTokenDAO;
+
+    @Autowired
+    private ConfParamOps confParamOps;
+
+    @Autowired
+    protected ConnectorFactory connFactory;
+
+    @Autowired
+    protected AuditManager auditManager;
+
+    @Autowired
+    protected MappingManager mappingManager;
+
+    @Autowired
+    protected ImplementationLookup implementationLookup;
+
+    private Map&lt;String, JWTSSOProvider&gt; jwtSSOProviders;
+
+    public JWTSSOProvider getJWTSSOProvider(final String issuer) {
+<span class="nc" id="L135">        synchronized (this) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (jwtSSOProviders == null) {</span>
+<span class="nc" id="L137">                jwtSSOProviders = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L139">                implementationLookup.getJWTSSOProviderClasses().stream().</span>
+<span class="nc" id="L140">                        map(clazz -&gt; (JWTSSOProvider) ApplicationContextProvider.getBeanFactory().</span>
+<span class="nc" id="L141">                        createBean(clazz, AbstractBeanDefinition.AUTOWIRE_BY_TYPE, true)).</span>
+<span class="nc" id="L142">                        forEach(jwtSSOProvider -&gt; jwtSSOProviders.put(jwtSSOProvider.getIssuer(), jwtSSOProvider));</span>
+            }
+<span class="nc" id="L144">        }</span>
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (issuer == null) {</span>
+<span class="nc" id="L147">            throw new AuthenticationCredentialsNotFoundException(&quot;A null issuer is not permitted&quot;);</span>
+        }
+<span class="nc" id="L149">        JWTSSOProvider provider = jwtSSOProviders.get(issuer);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (provider == null) {</span>
+<span class="nc" id="L151">            throw new AuthenticationCredentialsNotFoundException(</span>
+                    &quot;Could not find any registered JWTSSOProvider for issuer &quot; + issuer);
+        }
+
+<span class="nc" id="L155">        return provider;</span>
+    }
+
+    /**
+     * Attempts to authenticate the given credentials against internal storage and pass-through resources (if
+     * configured): the first succeeding causes global success.
+     *
+     * @param domain domain
+     * @param authentication given credentials
+     * @return {@code null} if no matching user was found, authentication result otherwise
+     */
+    @Transactional(noRollbackFor = DisabledException.class)
+    public Pair&lt;User, Boolean&gt; authenticate(final String domain, final Authentication authentication) {
+<span class="nc" id="L168">        User user = null;</span>
+
+<span class="nc" id="L170">        List&lt;String&gt; authAttrValues = List.of(confParamOps.get(domain,</span>
+                &quot;authentication.attributes&quot;, new String[] { &quot;username&quot; }, String[].class));
+<span class="nc bnc" id="L172" title="All 4 branches missed.">        for (int i = 0; user == null &amp;&amp; i &lt; authAttrValues.size(); i++) {</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">            if (&quot;username&quot;.equals(authAttrValues.get(i))) {</span>
+<span class="nc" id="L174">                user = userDAO.findByUsername(authentication.getName());</span>
+            } else {
+<span class="nc" id="L176">                AttrCond attrCond = new AttrCond(AttrCond.Type.EQ);</span>
+<span class="nc" id="L177">                attrCond.setSchema(authAttrValues.get(i));</span>
+<span class="nc" id="L178">                attrCond.setExpression(authentication.getName());</span>
+<span class="nc" id="L179">                List&lt;User&gt; users = searchDAO.search(SearchCond.getLeaf(attrCond), AnyTypeKind.USER);</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">                if (users.size() == 1) {</span>
+<span class="nc" id="L181">                    user = users.get(0);</span>
+                } else {
+<span class="nc" id="L183">                    LOG.warn(&quot;Value {} provided for {} does not uniquely identify a user&quot;,</span>
+<span class="nc" id="L184">                            authentication.getName(), authAttrValues.get(i));</span>
+                }
+            }
+        }
+
+<span class="nc" id="L189">        Boolean authenticated = null;</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (user != null) {</span>
+<span class="nc" id="L191">            authenticated = false;</span>
+
+<span class="nc bnc" id="L193" title="All 4 branches missed.">            if (user.isSuspended() != null &amp;&amp; user.isSuspended()) {</span>
+<span class="nc" id="L194">                throw new DisabledException(&quot;User &quot; + user.getUsername() + &quot; is suspended&quot;);</span>
+            }
+
+<span class="nc" id="L197">            String[] authStatuses = confParamOps.get(</span>
+                    domain, &quot;authentication.statuses&quot;, new String[] {}, String[].class);
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            if (!ArrayUtils.contains(authStatuses, user.getStatus())) {</span>
+<span class="nc" id="L200">                throw new DisabledException(&quot;User &quot; + user.getUsername() + &quot; not allowed to authenticate&quot;);</span>
+            }
+
+<span class="nc" id="L203">            boolean userModified = false;</span>
+<span class="nc" id="L204">            authenticated = AuthDataAccessor.this.authenticate(user, authentication.getCredentials().toString());</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">            if (authenticated) {</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                if (confParamOps.get(domain, &quot;log.lastlogindate&quot;, true, Boolean.class)) {</span>
+<span class="nc" id="L207">                    user.setLastLoginDate(new Date());</span>
+<span class="nc" id="L208">                    userModified = true;</span>
+                }
+
+<span class="nc bnc" id="L211" title="All 2 branches missed.">                if (user.getFailedLogins() != 0) {</span>
+<span class="nc" id="L212">                    user.setFailedLogins(0);</span>
+<span class="nc" id="L213">                    userModified = true;</span>
+                }
+
+            } else {
+<span class="nc" id="L217">                user.setFailedLogins(user.getFailedLogins() + 1);</span>
+<span class="nc" id="L218">                userModified = true;</span>
+            }
+
+<span class="nc bnc" id="L221" title="All 2 branches missed.">            if (userModified) {</span>
+<span class="nc" id="L222">                userDAO.save(user);</span>
+            }
+        }
+
+<span class="nc" id="L226">        return Pair.of(user, authenticated);</span>
+    }
+
+    protected boolean authenticate(final User user, final String password) {
+<span class="nc" id="L230">        boolean authenticated = ENCRYPTOR.verify(password, user.getCipherAlgorithm(), user.getPassword());</span>
+<span class="nc" id="L231">        LOG.debug(&quot;{} authenticated on internal storage: {}&quot;, user.getUsername(), authenticated);</span>
+
+<span class="nc" id="L233">        for (Iterator&lt;? extends ExternalResource&gt; itor = getPassthroughResources(user).iterator();</span>
+<span class="nc bnc" id="L234" title="All 4 branches missed.">                itor.hasNext() &amp;&amp; !authenticated;) {</span>
+
+<span class="nc" id="L236">            ExternalResource resource = itor.next();</span>
+<span class="nc" id="L237">            String connObjectKey = null;</span>
+            try {
+<span class="nc" id="L239">                AnyType userType = anyTypeDAO.findUser();</span>
+<span class="nc" id="L240">                Optional&lt;? extends Provision&gt; provision = resource.getProvision(userType);</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                if (provision.isEmpty()) {</span>
+<span class="nc" id="L242">                    throw new AccountNotFoundException(&quot;Unable to locate provision for user type &quot; + userType.getKey());</span>
+                }
+<span class="nc" id="L244">                Optional&lt;String&gt; connObjectKeyValue = mappingManager.getConnObjectKeyValue(user, provision.get());</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">                if (connObjectKeyValue.isEmpty()) {</span>
+<span class="nc" id="L246">                    throw new AccountNotFoundException(</span>
+<span class="nc" id="L247">                        &quot;Unable to locate conn object key value for &quot; + userType.getKey());</span>
+                }
+<span class="nc" id="L249">                connObjectKey = connObjectKeyValue.get();</span>
+<span class="nc" id="L250">                Uid uid = connFactory.getConnector(resource).authenticate(connObjectKey, password, null);</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                if (uid != null) {</span>
+<span class="nc" id="L252">                    authenticated = true;</span>
+                }
+<span class="nc" id="L254">            } catch (Exception e) {</span>
+<span class="nc" id="L255">                LOG.debug(&quot;Could not authenticate {} on {}&quot;, user.getUsername(), resource.getKey(), e);</span>
+<span class="nc" id="L256">            }</span>
+<span class="nc" id="L257">            LOG.debug(&quot;{} authenticated on {} as {}: {}&quot;,</span>
+<span class="nc" id="L258">                    user.getUsername(), resource.getKey(), connObjectKey, authenticated);</span>
+<span class="nc" id="L259">        }</span>
+
+<span class="nc" id="L261">        return authenticated;</span>
+    }
+
+    protected Set&lt;? extends ExternalResource&gt; getPassthroughResources(final User user) {
+<span class="nc" id="L265">        Set&lt;? extends ExternalResource&gt; result = null;</span>
+
+        // 1. look for assigned resources, pick the ones whose account policy has authentication resources
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        for (ExternalResource resource : userDAO.findAllResources(user)) {</span>
+<span class="nc bnc" id="L269" title="All 4 branches missed.">            if (resource.getAccountPolicy() != null &amp;&amp; !resource.getAccountPolicy().getResources().isEmpty()) {</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                if (result == null) {</span>
+<span class="nc" id="L271">                    result = resource.getAccountPolicy().getResources();</span>
+                } else {
+<span class="nc" id="L273">                    result.retainAll(resource.getAccountPolicy().getResources());</span>
+                }
+            }
+<span class="nc" id="L276">        }</span>
+
+        // 2. look for realms, pick the ones whose account policy has authentication resources
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        for (Realm realm : realmDAO.findAncestors(user.getRealm())) {</span>
+<span class="nc bnc" id="L280" title="All 4 branches missed.">            if (realm.getAccountPolicy() != null &amp;&amp; !realm.getAccountPolicy().getResources().isEmpty()) {</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                if (result == null) {</span>
+<span class="nc" id="L282">                    result = realm.getAccountPolicy().getResources();</span>
+                } else {
+<span class="nc" id="L284">                    result.retainAll(realm.getAccountPolicy().getResources());</span>
+                }
+            }
+<span class="nc" id="L287">        }</span>
+
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        return result == null ? Set.of() : result;</span>
+    }
+
+    protected static Set&lt;SyncopeGrantedAuthority&gt; getAdminAuthorities() {
+<span class="nc" id="L293">        return EntitlementsHolder.getInstance().getValues().stream().</span>
+<span class="nc" id="L294">                map(entitlement -&gt; new SyncopeGrantedAuthority(entitlement, SyncopeConstants.ROOT_REALM)).</span>
+<span class="nc" id="L295">                collect(Collectors.toSet());</span>
+    }
+
+    protected Set&lt;SyncopeGrantedAuthority&gt; getUserAuthorities(final User user) {
+<span class="nc" id="L299">        Set&lt;SyncopeGrantedAuthority&gt; authorities = new HashSet&lt;&gt;();</span>
+
+<span class="nc bnc" id="L301" title="All 2 branches missed.">        if (user.isMustChangePassword()) {</span>
+<span class="nc" id="L302">            authorities.add(new SyncopeGrantedAuthority(IdRepoEntitlement.MUST_CHANGE_PASSWORD));</span>
+        } else {
+<span class="nc" id="L304">            Map&lt;String, Set&lt;String&gt;&gt; entForRealms = new HashMap&lt;&gt;();</span>
+
+            // Give entitlements as assigned by roles (with static or dynamic realms, where applicable) - assigned
+            // either statically and dynamically
+<span class="nc" id="L308">            userDAO.findAllRoles(user).forEach(role -&gt; role.getEntitlements().forEach(entitlement -&gt; {</span>
+<span class="nc" id="L309">                Set&lt;String&gt; realms = entForRealms.get(entitlement);</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">                if (realms == null) {</span>
+<span class="nc" id="L311">                    realms = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L312">                    entForRealms.put(entitlement, realms);</span>
+                }
+<span class="nc" id="L314">                realms.addAll(role.getRealms().stream().</span>
+<span class="nc" id="L315">                        map(Realm::getFullPath).collect(Collectors.toSet()));</span>
+<span class="nc bnc" id="L316" title="All 4 branches missed.">                if (!entitlement.endsWith(&quot;_CREATE&quot;) &amp;&amp; !entitlement.endsWith(&quot;_DELETE&quot;)) {</span>
+<span class="nc" id="L317">                    realms.addAll(role.getDynRealms().stream().map(Entity::getKey).collect(Collectors.toList()));</span>
+                }
+<span class="nc" id="L319">            }));</span>
+
+            // Give group entitlements for owned groups
+<span class="nc" id="L322">            groupDAO.findOwnedByUser(user.getKey()).forEach((group) -&gt; {</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">                for (String entitlement : GROUP_OWNER_ENTITLEMENTS) {</span>
+<span class="nc" id="L324">                    Set&lt;String&gt; realms = entForRealms.get(entitlement);</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">                    if (realms == null) {</span>
+<span class="nc" id="L326">                        realms = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L327">                        entForRealms.put(entitlement, realms);</span>
+                    }
+
+<span class="nc" id="L330">                    realms.add(RealmUtils.getGroupOwnerRealm(group.getRealm().getFullPath(), group.getKey()));</span>
+                }
+<span class="nc" id="L332">            });</span>
+
+            // Finally normalize realms for each given entitlement and generate authorities
+<span class="nc" id="L335">            entForRealms.entrySet().stream().map(entry -&gt; {</span>
+<span class="nc" id="L336">                SyncopeGrantedAuthority authority = new SyncopeGrantedAuthority(entry.getKey());</span>
+<span class="nc" id="L337">                authority.addRealms(RealmUtils.normalize(entry.getValue()));</span>
+<span class="nc" id="L338">                return authority;</span>
+<span class="nc" id="L339">            }).forEachOrdered(authorities::add);</span>
+        }
+
+<span class="nc" id="L342">        return authorities;</span>
+    }
+
+    @Transactional
+    public Set&lt;SyncopeGrantedAuthority&gt; getAuthorities(final String username) {
+        Set&lt;SyncopeGrantedAuthority&gt; authorities;
+
+<span class="nc bnc" id="L349" title="All 2 branches missed.">        if (anonymousUser.equals(username)) {</span>
+<span class="nc" id="L350">            authorities = ANONYMOUS_AUTHORITIES;</span>
+<span class="nc bnc" id="L351" title="All 2 branches missed.">        } else if (adminUser.equals(username)) {</span>
+<span class="nc" id="L352">            authorities = getAdminAuthorities();</span>
+        } else {
+<span class="nc" id="L354">            User user = userDAO.findByUsername(username);</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L356">                authorities = Set.of();</span>
+            } else {
+<span class="nc" id="L358">                authorities = getUserAuthorities(user);</span>
+            }
+        }
+
+<span class="nc" id="L362">        return authorities;</span>
+    }
+
+    @Transactional
+    public Pair&lt;String, Set&lt;SyncopeGrantedAuthority&gt;&gt; authenticate(final JWTAuthentication authentication) {
+        String username;
+        Set&lt;SyncopeGrantedAuthority&gt; authorities;
+
+<span class="nc bnc" id="L370" title="All 2 branches missed.">        if (adminUser.equals(authentication.getClaims().getSubject())) {</span>
+<span class="nc" id="L371">            AccessToken accessToken = accessTokenDAO.find(authentication.getClaims().getTokenId());</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">            if (accessToken == null) {</span>
+<span class="nc" id="L373">                throw new AuthenticationCredentialsNotFoundException(</span>
+<span class="nc" id="L374">                        &quot;Could not find an Access Token for JWT &quot; + authentication.getClaims().getTokenId());</span>
+            }
+
+<span class="nc" id="L377">            username = adminUser;</span>
+<span class="nc" id="L378">            authorities = getAdminAuthorities();</span>
+<span class="nc" id="L379">        } else {</span>
+<span class="nc" id="L380">            JWTSSOProvider jwtSSOProvider = getJWTSSOProvider(authentication.getClaims().getIssuer());</span>
+<span class="nc" id="L381">            Pair&lt;User, Set&lt;SyncopeGrantedAuthority&gt;&gt; resolved = jwtSSOProvider.resolve(authentication.getClaims());</span>
+<span class="nc bnc" id="L382" title="All 4 branches missed.">            if (resolved == null || resolved.getLeft() == null) {</span>
+<span class="nc" id="L383">                throw new AuthenticationCredentialsNotFoundException(</span>
+<span class="nc" id="L384">                        &quot;Could not find User &quot; + authentication.getClaims().getSubject()</span>
+<span class="nc" id="L385">                        + &quot; for JWT &quot; + authentication.getClaims().getTokenId());</span>
+            }
+
+<span class="nc" id="L388">            User user = resolved.getLeft();</span>
+<span class="nc" id="L389">            username = user.getUsername();</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">            authorities = resolved.getRight() == null ? Set.of() : resolved.getRight();</span>
+<span class="nc" id="L391">            LOG.debug(&quot;JWT {} issued by {} resolved to User {} with authorities {}&quot;,</span>
+<span class="nc" id="L392">                    authentication.getClaims().getTokenId(),</span>
+<span class="nc" id="L393">                    authentication.getClaims().getIssuer(),</span>
+                    username, authorities);
+
+<span class="nc bnc" id="L396" title="All 2 branches missed.">            if (BooleanUtils.isTrue(user.isSuspended())) {</span>
+<span class="nc" id="L397">                throw new DisabledException(&quot;User &quot; + username + &quot; is suspended&quot;);</span>
+            }
+
+<span class="nc" id="L400">            List&lt;String&gt; authStatuses = List.of(confParamOps.get(authentication.getDetails().getDomain(),</span>
+                    &quot;authentication.statuses&quot;, new String[] {}, String[].class));
+<span class="nc bnc" id="L402" title="All 2 branches missed.">            if (!authStatuses.contains(user.getStatus())) {</span>
+<span class="nc" id="L403">                throw new DisabledException(&quot;User &quot; + username + &quot; not allowed to authenticate&quot;);</span>
+            }
+
+<span class="nc bnc" id="L406" title="All 2 branches missed.">            if (BooleanUtils.isTrue(user.isMustChangePassword())) {</span>
+<span class="nc" id="L407">                LOG.debug(&quot;User {} must change password, resetting authorities&quot;, username);</span>
+<span class="nc" id="L408">                authorities = Set.of(</span>
+                        new SyncopeGrantedAuthority(IdRepoEntitlement.MUST_CHANGE_PASSWORD));
+            }
+        }
+
+<span class="nc" id="L413">        return Pair.of(username, authorities);</span>
+    }
+
+    @Transactional
+    public void removeExpired(final String tokenKey) {
+<span class="nc" id="L418">        accessTokenDAO.delete(tokenKey);</span>
+<span class="nc" id="L419">    }</span>
+
+    @Transactional(readOnly = true)
+    public void audit(
+            final String who,
+            final AuditElements.EventCategoryType type,
+            final String category,
+            final String subcategory,
+            final String event,
+            final AuditElements.Result result,
+            final Object before,
+            final Object output,
+            final Object... input) {
+
+<span class="nc" id="L433">        auditManager.audit(who, type, category, subcategory, event, result, before, output, input);</span>
+<span class="nc" id="L434">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

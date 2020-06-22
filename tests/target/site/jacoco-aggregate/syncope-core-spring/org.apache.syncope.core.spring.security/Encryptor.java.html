@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Encryptor.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">Apache Syncope Tests</a> &gt; <a href="../index.html" class="el_bundle">syncope-core-spring</a> &gt; <a href="index.source.html" class="el_package">org.apache.syncope.core.spring.security</a> &gt; <span class="el_source">Encryptor.java</span></div><h1>Encryptor.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.syncope.core.spring.security;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.syncope.common.lib.PropertyUtils;
+import org.apache.syncope.common.lib.types.CipherAlgorithm;
+import org.jasypt.commons.CommonUtils;
+import org.jasypt.digest.StandardStringDigester;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
+public final class Encryptor {
+
+<span class="fc" id="L46">    private static final Logger LOG = LoggerFactory.getLogger(Encryptor.class);</span>
+
+<span class="fc" id="L48">    private static final Map&lt;String, Encryptor&gt; INSTANCES = new ConcurrentHashMap&lt;&gt;();</span>
+
+    private static final String DEFAULT_SECRET_KEY = &quot;1abcdefghilmnopqrstuvz2!&quot;;
+
+    /**
+     * Default value for salted {@link StandardStringDigester#setIterations(int)}.
+     */
+    private static final int DEFAULT_SALT_ITERATIONS = 1;
+
+    /**
+     * Default value for {@link StandardStringDigester#setSaltSizeBytes(int)}.
+     */
+    private static final int DEFAULT_SALT_SIZE_BYTES = 8;
+
+    /**
+     * Default value for {@link StandardStringDigester#setInvertPositionOfPlainSaltInEncryptionResults(boolean)}.
+     */
+    private static final boolean DEFAULT_IPOPSIER = true;
+
+    /**
+     * Default value for salted {@link StandardStringDigester#setInvertPositionOfSaltInMessageBeforeDigesting(boolean)}.
+     */
+    private static final boolean DEFAULT_IPOSIMBD = true;
+
+    /**
+     * Default value for salted {@link StandardStringDigester#setUseLenientSaltSizeCheck(boolean)}.
+     */
+    private static final boolean DEFAULT_ULSSC = true;
+
+    private static String SECRET_KEY;
+
+    private static Integer SALT_ITERATIONS;
+
+    private static Integer SALT_SIZE_BYTES;
+
+    private static Boolean IPOPSIER;
+
+    private static Boolean IPOSIMBD;
+
+    private static Boolean ULSSC;
+
+    static {
+        try {
+<span class="fc" id="L91">            Properties props = PropertyUtils.read(Encryptor.class, &quot;security.properties&quot;, &quot;conf.directory&quot;);</span>
+
+<span class="fc" id="L93">            SECRET_KEY = props.getProperty(&quot;secretKey&quot;);</span>
+<span class="fc" id="L94">            SALT_ITERATIONS = Integer.valueOf(props.getProperty(&quot;digester.saltIterations&quot;));</span>
+<span class="fc" id="L95">            SALT_SIZE_BYTES = Integer.valueOf(props.getProperty(&quot;digester.saltSizeBytes&quot;));</span>
+<span class="fc" id="L96">            IPOPSIER = Boolean.valueOf(props.getProperty(&quot;digester.invertPositionOfPlainSaltInEncryptionResults&quot;));</span>
+<span class="fc" id="L97">            IPOSIMBD = Boolean.valueOf(props.getProperty(&quot;digester.invertPositionOfSaltInMessageBeforeDigesting&quot;));</span>
+<span class="fc" id="L98">            ULSSC = Boolean.valueOf(props.getProperty(&quot;digester.useLenientSaltSizeCheck&quot;));</span>
+<span class="nc" id="L99">        } catch (Exception e) {</span>
+<span class="nc" id="L100">            LOG.error(&quot;Could not read security parameters&quot;, e);</span>
+<span class="fc" id="L101">        }</span>
+
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (SECRET_KEY == null) {</span>
+<span class="nc" id="L104">            SECRET_KEY = DEFAULT_SECRET_KEY;</span>
+<span class="nc" id="L105">            LOG.debug(&quot;secretKey not found, reverting to default&quot;);</span>
+        }
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if (SALT_ITERATIONS == null) {</span>
+<span class="nc" id="L108">            SALT_ITERATIONS = DEFAULT_SALT_ITERATIONS;</span>
+<span class="nc" id="L109">            LOG.debug(&quot;digester.saltIterations not found, reverting to default&quot;);</span>
+        }
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">        if (SALT_SIZE_BYTES == null) {</span>
+<span class="nc" id="L112">            SALT_SIZE_BYTES = DEFAULT_SALT_SIZE_BYTES;</span>
+<span class="nc" id="L113">            LOG.debug(&quot;digester.saltSizeBytes not found, reverting to default&quot;);</span>
+        }
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (IPOPSIER == null) {</span>
+<span class="nc" id="L116">            IPOPSIER = DEFAULT_IPOPSIER;</span>
+<span class="nc" id="L117">            LOG.debug(&quot;digester.invertPositionOfPlainSaltInEncryptionResults not found, reverting to default&quot;);</span>
+        }
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (IPOSIMBD == null) {</span>
+<span class="nc" id="L120">            IPOSIMBD = DEFAULT_IPOSIMBD;</span>
+<span class="nc" id="L121">            LOG.debug(&quot;digester.invertPositionOfSaltInMessageBeforeDigesting not found, reverting to default&quot;);</span>
+        }
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if (ULSSC == null) {</span>
+<span class="nc" id="L124">            ULSSC = DEFAULT_ULSSC;</span>
+<span class="nc" id="L125">            LOG.debug(&quot;digester.useLenientSaltSizeCheck not found, reverting to default&quot;);</span>
+        }
+<span class="fc" id="L127">    }</span>
+
+    public static Encryptor getInstance() {
+<span class="fc" id="L130">        return getInstance(SECRET_KEY);</span>
+    }
+
+    public static Encryptor getInstance(final String secretKey) {
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        String actualKey = StringUtils.isBlank(secretKey) ? DEFAULT_SECRET_KEY : secretKey;</span>
+
+<span class="fc" id="L136">        Encryptor instance = INSTANCES.get(actualKey);</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if (instance == null) {</span>
+<span class="fc" id="L138">            instance = new Encryptor(actualKey);</span>
+<span class="fc" id="L139">            INSTANCES.put(actualKey, instance);</span>
+        }
+
+<span class="fc" id="L142">        return instance;</span>
+    }
+
+<span class="fc" id="L145">    private final Map&lt;CipherAlgorithm, StandardStringDigester&gt; digesters = new ConcurrentHashMap&lt;&gt;();</span>
+
+    private SecretKeySpec keySpec;
+
+<span class="fc" id="L149">    private Encryptor(final String secretKey) {</span>
+<span class="fc" id="L150">        String actualKey = secretKey;</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (actualKey.length() &lt; 16) {</span>
+<span class="nc" id="L152">            StringBuilder actualKeyPadding = new StringBuilder(actualKey);</span>
+<span class="nc" id="L153">            int length = 16 - actualKey.length();</span>
+<span class="nc" id="L154">            String randomChars = SecureRandomUtils.generateRandomPassword(length);</span>
+
+<span class="nc" id="L156">            actualKeyPadding.append(randomChars);</span>
+<span class="nc" id="L157">            actualKey = actualKeyPadding.toString();</span>
+<span class="nc" id="L158">            LOG.warn(&quot;The secret key is too short (&lt; 16), adding some random characters. &quot;</span>
+                    + &quot;Passwords encrypted with AES and this key will not be recoverable &quot;
+                    + &quot;as a result if the container is restarted.&quot;);
+        }
+
+        try {
+<span class="fc" id="L164">            keySpec = new SecretKeySpec(ArrayUtils.subarray(</span>
+<span class="fc" id="L165">                    actualKey.getBytes(StandardCharsets.UTF_8), 0, 16),</span>
+<span class="fc" id="L166">                    CipherAlgorithm.AES.getAlgorithm());</span>
+<span class="nc" id="L167">        } catch (Exception e) {</span>
+<span class="nc" id="L168">            LOG.error(&quot;Error during key specification&quot;, e);</span>
+<span class="fc" id="L169">        }</span>
+<span class="fc" id="L170">    }</span>
+
+    public String encode(final String value, final CipherAlgorithm cipherAlgorithm)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            IllegalBlockSizeException, BadPaddingException {
+
+<span class="nc" id="L176">        String encoded = null;</span>
+
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (value != null) {</span>
+<span class="nc bnc" id="L179" title="All 4 branches missed.">            if (cipherAlgorithm == null || cipherAlgorithm == CipherAlgorithm.AES) {</span>
+<span class="nc" id="L180">                Cipher cipher = Cipher.getInstance(CipherAlgorithm.AES.getAlgorithm());</span>
+<span class="nc" id="L181">                cipher.init(Cipher.ENCRYPT_MODE, keySpec);</span>
+
+<span class="nc" id="L183">                encoded = Base64.getEncoder().encodeToString(cipher.doFinal(value.getBytes(StandardCharsets.UTF_8)));</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">            } else if (cipherAlgorithm == CipherAlgorithm.BCRYPT) {</span>
+<span class="nc" id="L185">                encoded = BCrypt.hashpw(value, BCrypt.gensalt());</span>
+            } else {
+<span class="nc" id="L187">                encoded = getDigester(cipherAlgorithm).digest(value);</span>
+            }
+        }
+
+<span class="nc" id="L191">        return encoded;</span>
+    }
+
+    public boolean verify(final String value, final CipherAlgorithm cipherAlgorithm, final String encoded) {
+<span class="nc" id="L195">        boolean verified = false;</span>
+
+        try {
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            if (value != null) {</span>
+<span class="nc bnc" id="L199" title="All 4 branches missed.">                if (cipherAlgorithm == null || cipherAlgorithm == CipherAlgorithm.AES) {</span>
+<span class="nc" id="L200">                    verified = encode(value, cipherAlgorithm).equals(encoded);</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">                } else if (cipherAlgorithm == CipherAlgorithm.BCRYPT) {</span>
+<span class="nc" id="L202">                    verified = BCrypt.checkpw(value, encoded);</span>
+                } else {
+<span class="nc" id="L204">                    verified = getDigester(cipherAlgorithm).matches(value, encoded);</span>
+                }
+            }
+<span class="nc" id="L207">        } catch (Exception e) {</span>
+<span class="nc" id="L208">            LOG.error(&quot;Could not verify encoded value&quot;, e);</span>
+<span class="nc" id="L209">        }</span>
+
+<span class="nc" id="L211">        return verified;</span>
+    }
+
+    public String decode(final String encoded, final CipherAlgorithm cipherAlgorithm)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            IllegalBlockSizeException, BadPaddingException {
+
+<span class="nc" id="L218">        String decoded = null;</span>
+
+<span class="nc bnc" id="L220" title="All 4 branches missed.">        if (encoded != null &amp;&amp; cipherAlgorithm == CipherAlgorithm.AES) {</span>
+<span class="nc" id="L221">            Cipher cipher = Cipher.getInstance(CipherAlgorithm.AES.getAlgorithm());</span>
+<span class="nc" id="L222">            cipher.init(Cipher.DECRYPT_MODE, keySpec);</span>
+
+<span class="nc" id="L224">            decoded = new String(cipher.doFinal(Base64.getDecoder().decode(encoded)), StandardCharsets.UTF_8);</span>
+        }
+
+<span class="nc" id="L227">        return decoded;</span>
+    }
+
+    private StandardStringDigester getDigester(final CipherAlgorithm cipherAlgorithm) {
+<span class="nc" id="L231">        StandardStringDigester digester = digesters.get(cipherAlgorithm);</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (digester == null) {</span>
+<span class="nc" id="L233">            digester = new StandardStringDigester();</span>
+
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            if (cipherAlgorithm.getAlgorithm().startsWith(&quot;S-&quot;)) {</span>
+                // Salted ...
+<span class="nc" id="L237">                digester.setAlgorithm(cipherAlgorithm.getAlgorithm().replaceFirst(&quot;S\\-&quot;, &quot;&quot;));</span>
+<span class="nc" id="L238">                digester.setIterations(SALT_ITERATIONS);</span>
+<span class="nc" id="L239">                digester.setSaltSizeBytes(SALT_SIZE_BYTES);</span>
+<span class="nc" id="L240">                digester.setInvertPositionOfPlainSaltInEncryptionResults(IPOPSIER);</span>
+<span class="nc" id="L241">                digester.setInvertPositionOfSaltInMessageBeforeDigesting(IPOSIMBD);</span>
+<span class="nc" id="L242">                digester.setUseLenientSaltSizeCheck(ULSSC);</span>
+            } else {
+                // Not salted ...
+<span class="nc" id="L245">                digester.setAlgorithm(cipherAlgorithm.getAlgorithm());</span>
+<span class="nc" id="L246">                digester.setIterations(1);</span>
+<span class="nc" id="L247">                digester.setSaltSizeBytes(0);</span>
+            }
+
+<span class="nc" id="L250">            digester.setStringOutputType(CommonUtils.STRING_OUTPUT_TYPE_HEXADECIMAL);</span>
+
+<span class="nc" id="L252">            digesters.put(cipherAlgorithm, digester);</span>
+        }
+
+<span class="nc" id="L255">        return digester;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

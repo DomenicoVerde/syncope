@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JWTAuthenticationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Apache Syncope Core Spring</a> &gt; <a href="index.source.html" class="el_package">org.apache.syncope.core.spring.security</a> &gt; <span class="el_source">JWTAuthenticationFilter.java</span></div><h1>JWTAuthenticationFilter.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.syncope.core.spring.security;
+
+import java.io.IOException;
+import java.util.Optional;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.HttpHeaders;
+import org.apache.cxf.rs.security.jose.jws.JwsException;
+import org.apache.cxf.rs.security.jose.jws.JwsJwtCompactConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+/**
+ * Processes the JSON Web Token provided as {@link HttpHeaders#AUTHORIZATION} HTTP header, putting the result into the
+ * {@link SecurityContextHolder}.
+ */
+public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
+
+<span class="nc" id="L46">    private static final Logger LOG = LoggerFactory.getLogger(JWTAuthenticationFilter.class);</span>
+
+    @Autowired
+    private AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private SyncopeAuthenticationDetailsSource authenticationDetailsSource;
+
+    @Autowired
+    private AuthDataAccessor dataAccessor;
+
+    @Autowired
+    private DefaultCredentialChecker credentialChecker;
+
+    public JWTAuthenticationFilter(final AuthenticationManager authenticationManager) {
+<span class="nc" id="L61">        super(authenticationManager);</span>
+<span class="nc" id="L62">    }</span>
+
+    @Override
+    protected void doFilterInternal(
+            final HttpServletRequest request,
+            final HttpServletResponse response,
+            final FilterChain chain)
+            throws ServletException, IOException {
+
+<span class="nc" id="L71">        String auth = request.getHeader(HttpHeaders.AUTHORIZATION);</span>
+<span class="nc" id="L72">        String[] parts = Optional.ofNullable(auth).map(s -&gt; s.split(&quot; &quot;)).orElse(null);</span>
+<span class="nc bnc" id="L73" title="All 6 branches missed.">        if (parts == null || parts.length != 2 || !&quot;Bearer&quot;.equals(parts[0])) {</span>
+<span class="nc" id="L74">            chain.doFilter(request, response);</span>
+<span class="nc" id="L75">            return;</span>
+        }
+
+<span class="nc" id="L78">        String stringToken = parts[1];</span>
+<span class="nc" id="L79">        LOG.debug(&quot;JWT received: {}&quot;, stringToken);</span>
+
+        try {
+<span class="nc" id="L82">            credentialChecker.checkIsDefaultJWSKeyInUse();</span>
+
+<span class="nc" id="L84">            JwsJwtCompactConsumer consumer = new JwsJwtCompactConsumer(stringToken);</span>
+<span class="nc" id="L85">            JWTSSOProvider jwtSSOProvider = dataAccessor.getJWTSSOProvider(consumer.getJwtClaims().getIssuer());</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            if (!consumer.verifySignatureWith(jwtSSOProvider)) {</span>
+<span class="nc" id="L87">                throw new BadCredentialsException(&quot;Invalid signature found in JWT&quot;);</span>
+            }
+
+<span class="nc" id="L90">            SecurityContextHolder.getContext().setAuthentication(</span>
+<span class="nc" id="L91">                    new JWTAuthentication(consumer.getJwtClaims(), authenticationDetailsSource.buildDetails(request)));</span>
+
+<span class="nc" id="L93">            chain.doFilter(request, response);</span>
+<span class="nc" id="L94">        } catch (JwsException e) {</span>
+<span class="nc" id="L95">            SecurityContextHolder.clearContext();</span>
+<span class="nc" id="L96">            this.authenticationEntryPoint.commence(</span>
+                    request, response, new BadCredentialsException(&quot;Invalid JWT: &quot; + stringToken, e));
+<span class="nc" id="L98">        } catch (AuthenticationException e) {</span>
+<span class="nc" id="L99">            SecurityContextHolder.clearContext();</span>
+<span class="nc" id="L100">            this.authenticationEntryPoint.commence(request, response, e);</span>
+<span class="nc" id="L101">        }</span>
+<span class="nc" id="L102">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

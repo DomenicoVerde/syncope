@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SyncopeAuthenticationDetails.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Apache Syncope Core Spring</a> &gt; <a href="index.source.html" class="el_package">org.apache.syncope.core.spring.security</a> &gt; <span class="el_source">SyncopeAuthenticationDetails.java</span></div><h1>SyncopeAuthenticationDetails.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * &quot;License&quot;); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.syncope.core.spring.security;
+
+import java.io.Serializable;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.syncope.common.lib.SyncopeConstants;
+import org.apache.syncope.common.rest.api.RESTHeaders;
+
+public class SyncopeAuthenticationDetails implements Serializable {
+
+    private static final long serialVersionUID = -5899959397393502897L;
+
+    private final String domain;
+
+<span class="nc" id="L36">    public SyncopeAuthenticationDetails(final HttpServletRequest request) {</span>
+<span class="nc" id="L37">        this.domain = request.getHeader(RESTHeaders.DOMAIN);</span>
+<span class="nc" id="L38">    }</span>
+
+<span class="nc" id="L40">    public SyncopeAuthenticationDetails(final String domain) {</span>
+<span class="nc" id="L41">        this.domain = domain;</span>
+<span class="nc" id="L42">    }</span>
+
+    public String getDomain() {
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        return StringUtils.isBlank(domain)</span>
+<span class="nc" id="L46">                ? SyncopeConstants.MASTER_DOMAIN</span>
+<span class="nc" id="L47">                : domain;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L52">        return new HashCodeBuilder().</span>
+<span class="nc" id="L53">                append(domain).</span>
+<span class="nc" id="L54">                build();</span>
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L60">            return true;</span>
+        }
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (obj == null) {</span>
+<span class="nc" id="L63">            return false;</span>
+        }
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (getClass() != obj.getClass()) {</span>
+<span class="nc" id="L66">            return false;</span>
+        }
+<span class="nc" id="L68">        final SyncopeAuthenticationDetails other = (SyncopeAuthenticationDetails) obj;</span>
+<span class="nc" id="L69">        return new EqualsBuilder().</span>
+<span class="nc" id="L70">                append(domain, other.domain).</span>
+<span class="nc" id="L71">                build();</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L76">        return new ToStringBuilder(this).</span>
+<span class="nc" id="L77">                append(domain).</span>
+<span class="nc" id="L78">                build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
